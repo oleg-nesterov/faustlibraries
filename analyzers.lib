@@ -876,6 +876,30 @@ with {
     ang = atan2;
 };
 
+//-------------------------`(an.)unwrap` --------------------------------------
+// Unwrap the input signal so that successive output values never differ
+// by more than `pi`, switching to a 2*pi-complementary value when needed.
+//
+// #### Usage
+//
+// ```
+// _ : unwrap(pi) : _
+// ```
+//
+// Where:
+//
+// * `pi`: maximum discontinuity between the output values (typically `ma.PI`)
+//
+// #### Example
+//
+// process = 0 - os.oscrc(1000)          // the true phase is either -PI or +PI
+//         : an.resonator(1,1000) : !,_  // oscillates between -PI and +PI
+//         : an.unwrap(ma.PI);           // oscillates near +PI
+//-----------------------------------------------------------------------------
+unwrap(pi,x) = (_ <: +(dz)) ~ _ with {
+    dz(z) = (x - z) % (2*pi) <:
+            ba.ifNc(2, >(pi),-(2*pi), <(-pi),+(2*pi));
+};
 
 // Undocumented utility functions used by fft and ifft:
 c_magsq(N) = si.cbus(N) : par(i,N,(par(j,2,abs<:_*_):>_)) :> si.bus(N);
